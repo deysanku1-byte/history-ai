@@ -26,7 +26,7 @@ st.caption("🤖 Powered by Free Hugging Face AI Model & Streamlit Cloud — Com
 # ২. Hugging Face ফ্রি টোকেন সেটআপ
 hf_token = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
-# Secrets থেকে PDF এর নাম নেওয়া (Advanced Settings এ যা সেট করেছেন)
+# Secrets থেকে PDF এর নাম নেওয়া
 PDF_FILE_NAME = os.getenv("PDF_FILE_NAME", "SocialScience English History Part-I Class X.pdf")
 
 # ৩. পিডিএফ প্রসেসিং এবং ডাটাবেস তৈরি
@@ -51,7 +51,7 @@ vector_db = initialize_knowledge_base(PDF_FILE_NAME)
 
 # ৪. ইন্টারফেস ডিজাইন (বাম পাশের ফিল্টার প্যানেল)
 with st.sidebar:
-    st.header("⚙️ স্মার্ট কন্ট্রোল প্যানেল")
+    st.header("⚙️ スマートコントロールパネル")
     st.write("আপনার পিডিএফ থেকে নির্দিষ্ট নম্বরের নির্ভুল উত্তর তৈরির গাইড।")
     
     selected_mark = st.radio(
@@ -74,7 +74,8 @@ else:
                     related_docs = vector_db.similarity_search(query, k=3)
                     context = "\n".join([doc.page_content for doc in related_docs])
                     
-                    repo_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+                    # অত্যন্ত শক্তিশালী ও দ্রুতগতির ফ্রি মডেল Qwen এ পরিবর্তন করা হলো
+                    repo_id = "Qwen/Qwen2.5-72B-Instruct"
                     llm = HuggingFaceEndpoint(
                         repo_id=repo_id,
                         huggingfacehub_api_token=hf_token,
@@ -95,7 +96,7 @@ else:
                     3. If '3 Marks', provide 3 to 5 lines or 3 points.
                     4. If '5 Marks', provide a detailed structured essay answer of 100 to 200 words with clear sub-headings/points.
                     5. First write the answer in high-quality 'Standard English Answer'.
-                    6. Right below the English answer, write 'বাংলা অনুবাদ (Bengali Version)' containing an accurate, easy-to-understand Bengali translation for students.
+                    6. Right below the English answer, write '### 🇮🇳 বাংলা অনুবাদ (Bengali Version)' containing an accurate, easy-to-understand Bengali translation for students.
                     
                     Output Layout:
                     [English Answer here]
@@ -112,6 +113,7 @@ else:
                     st.write(ai_response)
                     
                 except Exception as e:
-                    st.error("এআই মডেল রেসপন্স করতে পারছে না। আপনার Secrets এ টোকেনটি ঠিকমতো দেওয়া আছে কি না চেক করুন।")
+                    # যদি ফ্রি সার্ভার সাময়িক ডাউন থাকে তবে ব্যাকআপ হিসেবে অন্য মডেল ট্রাই করার মেসেজ
+                    st.error("Hugging Face-এর ফ্রি এআই সার্ভার এই মুহূর্তে কিছুটা ব্যস্ত। দয়া করে ৩০ সেকেন্ড পর বাটনটিতে আরেকবার ক্লিক করুন অথবা আপনার টোকেন টাইপটি চেক করুন।")
         else:
             st.warning("দয়া করে প্রথমে একটি প্রশ্ন টাইপ করুন!")
