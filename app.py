@@ -51,7 +51,7 @@ vector_db = initialize_knowledge_base(PDF_FILE_NAME)
 
 # ৪. ইন্টারফেস ডিজাইন (বাম পাশের ফিল্টার প্যানেল)
 with st.sidebar:
-    st.header("⚙️ スマートコントロールパネル")
+    st.header("⚙️ স্মার্ট কন্ট্রোল প্যানেল")
     st.write("আপনার পিডিএফ থেকে নির্দিষ্ট নম্বরের নির্ভুল উত্তর তৈরির গাইড।")
     
     selected_mark = st.radio(
@@ -74,8 +74,8 @@ else:
                     related_docs = vector_db.similarity_search(query, k=3)
                     context = "\n".join([doc.page_content for doc in related_docs])
                     
-                    # অত্যন্ত শক্তিশালী ও দ্রুতগতির ফ্রি মডেল Qwen এ পরিবর্তন করা হলো
-                    repo_id = "Qwen/Qwen2.5-72B-Instruct"
+                    # সবসময় সচল থাকা সুপার-ফাস্ট অফিশিয়াল ফ্রি মডেল Mistral-7B তে পরিবর্তন করা হলো
+                    repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
                     llm = HuggingFaceEndpoint(
                         repo_id=repo_id,
                         huggingfacehub_api_token=hf_token,
@@ -83,28 +83,7 @@ else:
                         max_new_tokens=1024
                     )
                     
-                    prompt = f"""
-                    You are an expert Class X History Teacher. Base your answer strictly on the context provided below.
-                    Context: {context}
-                    
-                    Question: {query}
-                    Target Marks Requirement: {selected_mark}
-                    
-                    Strict Formatting Rules:
-                    1. If the requirement is '1 Mark', provide exactly 1 to 2 lines of clear answer.
-                    2. If '2 Marks', provide 2 to 3 lines or 2 short points.
-                    3. If '3 Marks', provide 3 to 5 lines or 3 points.
-                    4. If '5 Marks', provide a detailed structured essay answer of 100 to 200 words with clear sub-headings/points.
-                    5. First write the answer in high-quality 'Standard English Answer'.
-                    6. Right below the English answer, write '### 🇮🇳 বাংলা অনুবাদ (Bengali Version)' containing an accurate, easy-to-understand Bengali translation for students.
-                    
-                    Output Layout:
-                    [English Answer here]
-                    
-                    ---
-                    ### 🇮🇳 বাংলা অনুবাদ (Bengali Version)
-                    [Bengali Translation here]
-                    """
+                    prompt = f"<s>[INST] You are an expert Class X History Teacher. Base your answer strictly on the context provided below. \nContext: {context} \n\nQuestion: {query} \nTarget Marks Requirement: {selected_mark} \n\nStrict Formatting Rules:\n1. If the requirement is '1 Mark', provide exactly 1 to 2 lines of clear answer.\n2. If '2 Marks', provide 2 to 3 lines or 2 short points.\n3. If '3 Marks', provide 3 to 5 lines or 3 points.\n4. If '5 Marks', provide a detailed structured essay answer of 100 to 200 words with clear sub-headings/points.\n5. First write the answer in high-quality 'Standard English Answer'.\n6. Right below the English answer, write '### 🇮🇳 বাংলা অনুবাদ (Bengali Version)' containing an accurate, easy-to-understand Bengali translation for students.\n\nOutput Layout:\n[English Answer here]\n\n---\n### 🇮🇳 বাংলা অনুবাদ (Bengali Version)\n[Bengali Translation here] [/INST]"
                     
                     ai_response = llm.invoke(prompt)
                     
@@ -113,7 +92,6 @@ else:
                     st.write(ai_response)
                     
                 except Exception as e:
-                    # যদি ফ্রি সার্ভার সাময়িক ডাউন থাকে তবে ব্যাকআপ হিসেবে অন্য মডেল ট্রাই করার মেসেজ
                     st.error("Hugging Face-এর ফ্রি এআই সার্ভার এই মুহূর্তে কিছুটা ব্যস্ত। দয়া করে ৩০ সেকেন্ড পর বাটনটিতে আরেকবার ক্লিক করুন অথবা আপনার টোকেন টাইপটি চেক করুন।")
         else:
             st.warning("দয়া করে প্রথমে একটি প্রশ্ন টাইপ করুন!")
